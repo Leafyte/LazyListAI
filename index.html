@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LazyList AI: dinner ideas and a shopping list from what you have</title>
+  <meta name="description" content="Tell LazyList what's in your kitchen. A local Gemma model suggests easy meals and writes the shopping list for what's missing.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232b4bd8'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11.5' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="wrap">
+    <header class="site-header">
+      <div class="brand">
+        <svg class="logo" viewBox="0 0 32 32" width="36" height="36" aria-hidden="true">
+          <rect width="32" height="32" rx="8" fill="currentColor"/>
+          <path d="M9 16.5l4.5 4.5L23 11.5" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div>
+          <h1>LazyList AI</h1>
+          <p class="tagline">Tell it what's in the kitchen. Get easy meals and a list of what to buy.</p>
+        </div>
+      </div>
+      <p id="health" class="pill" data-state="checking" title="">
+        <span class="dot" aria-hidden="true"></span><span id="health-label">Checking Ollama</span>
+      </p>
+    </header>
+
+    <div id="banner" class="banner" role="alert" hidden>
+      <p id="banner-text"></p>
+      <button type="button" id="banner-close" class="btn btn-quiet" aria-label="Dismiss message">Dismiss</button>
+    </div>
+
+    <main class="layout">
+      <div class="col-main">
+        <section class="panel" aria-labelledby="pantry-title">
+          <h2 id="pantry-title">What do you already have?</h2>
+          <form id="pantry-form" class="row" autocomplete="off">
+            <label class="sr-only" for="ingredient-input">Ingredient</label>
+            <input id="ingredient-input" type="text" maxlength="120" placeholder="eggs, rice, spinach" enterkeyhint="done">
+            <button type="submit" class="btn">Add</button>
+          </form>
+          <p class="hint">Press Enter or type a comma to add an ingredient. Paste a whole list if you like.</p>
+
+          <ul id="pantry-list" class="chips" aria-label="Your ingredients"></ul>
+          <p id="pantry-empty" class="empty">Nothing added yet. <button type="button" id="example-btn" class="link-btn">Try an example</button></p>
+
+          <div class="controls">
+            <div class="field">
+              <label for="meal-count">Meals</label>
+              <select id="meal-count">
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="diet">Diet</label>
+              <select id="diet">
+                <option value="any">No preference</option>
+                <option value="vegetarian">Vegetarian</option>
+                <option value="vegan">Vegan</option>
+              </select>
+            </div>
+            <button type="button" id="suggest-btn" class="btn btn-primary" disabled>
+              <span class="spinner" aria-hidden="true"></span><span id="suggest-label">Suggest meals</span>
+            </button>
+            <button type="button" id="clear-pantry" class="btn btn-quiet" hidden>Clear ingredients</button>
+          </div>
+        </section>
+
+        <section class="meals-section" aria-labelledby="meals-title">
+          <h2 id="meals-title">Meal ideas</h2>
+          <div id="meals" aria-live="polite"></div>
+        </section>
+      </div>
+
+      <aside class="col-side">
+        <section class="note" aria-labelledby="list-title">
+          <div class="note-head">
+            <h2 id="list-title">Shopping list</h2>
+            <p id="list-count" class="note-count"></p>
+          </div>
+
+          <ul id="shopping-list" class="note-list" aria-label="Shopping list"></ul>
+          <p id="shopping-empty" class="note-empty"></p>
+
+          <form id="add-item-form" class="row" autocomplete="off">
+            <label class="sr-only" for="add-item-input">Add an item</label>
+            <input id="add-item-input" type="text" maxlength="80" placeholder="Add an item">
+            <button type="submit" class="btn btn-note">Add</button>
+          </form>
+
+          <div class="note-actions">
+            <button type="button" id="remove-checked" class="btn btn-quiet">Remove checked</button>
+            <button type="button" id="copy-list" class="btn btn-quiet">Copy list</button>
+            <button type="button" id="clear-list" class="btn btn-quiet">Clear all</button>
+          </div>
+
+          <form id="save-form" class="row save-row" autocomplete="off">
+            <label class="sr-only" for="list-name">List name</label>
+            <input id="list-name" type="text" maxlength="40" placeholder="Name this list (optional)">
+            <button type="submit" class="btn btn-note">Save</button>
+          </form>
+        </section>
+
+        <section class="panel saved" aria-labelledby="saved-title">
+          <h2 id="saved-title">Saved lists</h2>
+          <ul id="saved-lists" class="saved-list"></ul>
+          <p id="saved-empty" class="empty">Lists you save stay in this browser.</p>
+        </section>
+      </aside>
+    </main>
+
+    <footer class="site-footer">
+      <p>Everything runs on your computer. Meals come from Gemma through Ollama, and your lists are stored in this browser only.</p>
+    </footer>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</body>
+</html>
